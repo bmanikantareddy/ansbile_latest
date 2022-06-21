@@ -1,4 +1,5 @@
 
 
 [all]
-150.136.113.28 ansible_ssh_user=opc ansible_ssh_private_key_file=/Users/bmanikantareddy/.ssh/id_rsa  host_key_checking=false
+150.136.113.28 ansible_ssh_user=opc ansible_ssh_private_key_file=/home/opc/ansible/id_rsa host_key_checking=false
+129.213.89.26 ansible_ssh_user=opc ansible_ssh_private_key_file=/home/opc/ansible/id_rsa host_key_checking=false

@@ -1,0 +1,13 @@
+---
+
+- name: test play
+  hosts: all
+  tasks:
+  #- debug:
+  #   var: ansible_facts 
+  - debug: 
+      msg: "Oracle linux version 6.10" 
+    when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'
+  - debug:
+      msg: "Oracle linux version 7.0"
+    when: ansible_os_family == 'RedHat' and ansible_distribution_major_version >= '7'

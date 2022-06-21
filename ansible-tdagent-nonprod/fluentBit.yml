@@ -3,3 +3,6 @@
   become: yes
   roles:
   - role: ansible-role-fluentbit
+  when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'
+  - role: secInsight_6.x
+  when: ansible_os_family == 'RedHat' and ansible_distribution_major_version >= '7'

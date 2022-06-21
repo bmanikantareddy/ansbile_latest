@@ -3,7 +3,7 @@
 - name: test play
   hosts: all
   become: yes
-  var:
+  vars:
     osquery_version: "4.9.0"
     filebeat_version: "7.17.0"
   tasks:

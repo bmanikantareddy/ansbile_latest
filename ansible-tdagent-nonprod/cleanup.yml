@@ -37,7 +37,7 @@
 
   - name: remove td-agent-bit.rpm
     yum:  
-      name: https://packages.fluentbit.io/centos/7/x86_64/td-agent-bit-1.7.9-1.x86_64.rpm
+      name: td-agent-bit
       state: absent
       disable_gpg_check: yes
 

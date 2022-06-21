@@ -1,0 +1,49 @@
+---
+
+- name: test play
+  hosts: all
+  become: yes
+  tasks:
+  - name: cleanup Osquery 
+    ansible.builtin.yum:
+      name: "https://osquery-packages.s3.us-east-1.amazonaws.com/rpm/osquery-{{osquery_version | default('4.9.0')}}-1.linux.x86_64.rpm"
+      state: absent
+      validate_certs: no
+
+  - name: Remove file Osquery conf file
+    ansible.builtin.file:
+      path: /etc/osquery   
+      state: absent
+
+  - name: Install filebeat 
+    ansible.builtin.yum:
+      name: "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{{filebeat_version}}-x86_64.rpm"
+      state: absent
+      validate_certs: no
+  
+  - name: Remove file Osquery conf file
+    ansible.builtin.file:
+      path: /etc/filebeat/ 
+      state: absent
+
+  - name: Install jq
+    yum:
+      name: "jq"
+      state: absent
+      update_cache: yes
+
+  - name: remove td-agent-bit.rpm
+    yum:  
+      name: https://packages.fluentbit.io/centos/7/x86_64/td-agent-bit-1.7.9-1.x86_64.rpm
+      state: absent
+      disable_gpg_check: yes
+
+  - name: Remove file Osquery conf file
+    ansible.builtin.file:
+      path: /etc/td-agent-bit/
+      state: absent  
+  
+ 
+
+  
+    

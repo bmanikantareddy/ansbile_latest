@@ -9,7 +9,7 @@
   tasks:
   - name: cleanup Osquery 
     ansible.builtin.yum:
-      name: "https://osquery-packages.s3.us-east-1.amazonaws.com/rpm/osquery-{{osquery_version | default('4.9.0')}}-1.linux.x86_64.rpm"
+      name: osqueryd
       state: absent
       validate_certs: no
 
@@ -20,7 +20,7 @@
 
   - name: Install filebeat 
     ansible.builtin.yum:
-      name: "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{{filebeat_version}}-x86_64.rpm"
+      name: filebeat
       state: absent
       validate_certs: no
   
@@ -31,7 +31,7 @@
 
   - name: Install jq
     yum:
-      name: "jq"
+      name: jq
       state: absent
       update_cache: yes
 

@@ -50,4 +50,4 @@
     notify: Restart Osquery service
     
   - import_tasks: configure.yml
-when: ansible_distribution_major_version == "7"
+  when: ansible_distribution_major_version >= "7"

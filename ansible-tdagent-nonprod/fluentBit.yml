@@ -2,7 +2,7 @@
 - hosts: all
   become: yes
   tasks:
-    - include_role:
+  - include_role:
       name: ansible-role-fluentbit
     when: ansible_os_family == 'RedHat' and ansible_distribution_major_version >= '7'
 

@@ -1,6 +1,0 @@
----
-# vars file for ansible-role-fluentbit
-
-oracle_home_path: "/usr/lib/oracle/18.3/client64/"
-ld_library_path: "/usr/lib/oracle/18.3/client64/lib/"
-bin_path: "/usr/lib/oracle/18.3/client64/bin/"

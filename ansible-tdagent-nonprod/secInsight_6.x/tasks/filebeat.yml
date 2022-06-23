@@ -9,126 +9,155 @@
       state: present
       validate_certs: no
 
+  - name: check for vminfo exists
+    stat:
+      path: /var/log/vminfo
+    register: vminfo_exists
+
+  - name: Extract meta data from OCI
+    block: 
     # load josn content from URL.
-  - name: Download JSON content play
-    uri:
-      url: http://169.254.169.254/opc/v1/instance/
-      return_content: yes
-    register: result
+    - name: Download JSON content play
+      uri:
+        url: http://169.254.169.254/opc/v1/instance/
+        return_content: yes
+      register: result
 
-  - name: save the Json data to vminfo as a Fact
-    set_fact:
-      vminfo: "{{ result.json }}"
+    - name: save the Json data to vminfo as a Fact
+      set_fact:
+        vminfo: "{{ result.json }}"
 
-    # load josn content from URL.
-  - name: Download JSON content play
-    uri:
-      url: http://169.254.169.254/opc/v1/vnics/
-      return_content: yes
-    register: result 
+    - name: copying vminfo to file
+      copy: 
+        content: "{{ result.json }}"
+        dest: /var/log/vminfo    
 
-  - name: save the Json data to vcninfo as a Fact
-    set_fact:
-      vcninfo: "{{ result.json }}"
+      # load josn content from URL.
+    - name: Download JSON content play
+      uri:
+        url: http://169.254.169.254/opc/v1/vnics/
+        return_content: yes
+      register: result 
 
-  - name: Retrieve the fileds from json data
-    set_fact:
-      availabilityDomain: "{{ vminfo | json_query('availabilityDomain') }}"
-      compartmentId: "{{ vminfo | json_query('compartmentId') }}"
-      faultDomain: "{{ vminfo | json_query('faultDomain') }}"
-      host_ip: "{{ vcninfo | json_query('[0].privateIp') }}"
-      hostname: "{{ vminfo | json_query('hostname') }}"
-      instanceId: "{{ vminfo | json_query('id') }}"
-      oci_region: "{{ vminfo | json_query('canonicalRegionName') }}"
-      subnet_cidr: "{{ vcninfo | json_query('[0].subnetCidrBlock') }}"
-      vm_shape: "{{ vminfo | json_query('shape') }}"
-      vnic_id: "{{ vcninfo | json_query('[0].vnicId') }}"
-      logstashfqdn: "{{logstashhost | default('127.0.0.1')}}:{{logstashport | default('5044')}}"
+    - name: save the Json data to vcninfo as a Fact
+      set_fact:
+        vcninfo: "{{ result.json }}"
 
-    # printing reterived fileds to stdout.
-  - name: Print out Vminfo
-    debug:
-      msg: 
-      - "availabilityDomain: {{availabilityDomain}}"
-      - "compartmentId: {{compartmentId}}"
-      - "faultDomain: {{faultDomain}}"
-      - "host_ip: {{host_ip}}"
-      - "hostname: {{hostname}}"
-      - "instanceId: {{instanceId}}"
-      - "oci_region: {{oci_region}}"
-      - "subnet_cidr: {{subnet_cidr}}"
-      - "vm_shape: {{vm_shape}}"
-      - "vnic_id: {{vnic_id}}"
-      - "logstashfqdn: {{logstashfqdn}}"  
+    - name: Retrieve the fileds from json data
+      set_fact:
+        availabilityDomain: "{{ vminfo | json_query('availabilityDomain') }}"
+        compartmentId: "{{ vminfo | json_query('compartmentId') }}"
+        faultDomain: "{{ vminfo | json_query('faultDomain') }}"
+        host_ip: "{{ vcninfo | json_query('[0].privateIp') }}"
+        hostname: "{{ vminfo | json_query('hostname') }}"
+        instanceId: "{{ vminfo | json_query('id') }}"
+        oci_region: "{{ vminfo | json_query('canonicalRegionName') }}"
+        subnet_cidr: "{{ vcninfo | json_query('[0].subnetCidrBlock') }}"
+        vm_shape: "{{ vminfo | json_query('shape') }}"
+        vnic_id: "{{ vcninfo | json_query('[0].vnicId') }}"
+        logstashfqdn: "{{logstashhost | default('127.0.0.1')}}:{{logstashport | default('5044')}}"
 
-  - name: configure osquery input to filebeat
-    blockinfile:
-      path: /etc/filebeat/filebeat.yml
-      insertafter: "filebeat.inputs:"
-      marker: "## {mark} OSquery input for filebeat logs" 
-      content: |
-        # osquery input
-        - type: log
-          enabled: true
-          paths:
-            - /var/log/osquery/osqueryd.results.log
-          fileds:
-                availabilityDomain: "{{availabilityDomain}}"
-                compartmentId: "{{compartmentId}}"
-                faultDomain: "{{faultDomain}}"
-                host_ip: "{{host_ip}}"
-                hostname: "{{hostname}}"
-                instanceId: "{{instanceId}}"
-                oci_region: "{{oci_region}}"
-                subnet_cidr: "{{subnet_cidr}}"
-                vm_shape: "{{subnet_cidr}}"
-                vnic_id: "{{vnic_id}}"
-          json.keys_under_root: true
-          fields_under_root: true
+      # printing reterived fileds to stdout.
+    - name: Print out Vminfo
+      debug:
+        msg: 
+        - "availabilityDomain: {{availabilityDomain}}"
+        - "compartmentId: {{compartmentId}}"
+        - "faultDomain: {{faultDomain}}"
+        - "host_ip: {{host_ip}}"
+        - "hostname: {{hostname}}"
+        - "instanceId: {{instanceId}}"
+        - "oci_region: {{oci_region}}"
+        - "subnet_cidr: {{subnet_cidr}}"
+        - "vm_shape: {{vm_shape}}"
+        - "vnic_id: {{vnic_id}}"
+        - "logstashfqdn: {{logstashfqdn}}"  
 
-  - name: install yq
-    become: yes
-    get_url:
-      url: https://github.com/mikefarah/yq/releases/download/v4.25.1/yq_linux_amd64
-      dest: /usr/bin/yq
-      mode: 0755
-      validate_certs: no
+    - name: Check whether /etc/rsyslog.conf contains "10.5.236.52:514"
+      command: grep -i "10.5.236.52:514" /etc/rsyslog.conf
+      register: checkmyconf
+      check_mode: no
+      ignore_errors: yes
+      changed_when: no
+    
+    - name: replace remote host in /etc/rsyslog.conf
+      shell: "sed -i '/. @@remote-host:514/ a .  @@10.5.236.52:514' /etc/rsyslog.conf"
+      when: checkmyconf.rc == 0 
 
-# filebeat supports only one output at a time.
-  - name: delete the existing outputs in filebeat conf
-    shell: yq eval 'del(."output.elasticsearch", ."output.logstash")' /etc/filebeat/filebeat.yml 
-    register: result    
+    - name: configure osquery input to filebeat
+      blockinfile:
+        path: /etc/filebeat/filebeat.yml
+        insertafter: "filebeat.inputs:"
+        marker: "## {mark} OSquery input for filebeat logs" 
+        content: |
+          # osquery input
+          - type: log
+            enabled: true
+            paths:
+              - /var/log/osquery/osqueryd.results.log
+            fileds:
+                  availabilityDomain: "{{availabilityDomain}}"
+                  compartmentId: "{{compartmentId}}"
+                  faultDomain: "{{faultDomain}}"
+                  host_ip: "{{host_ip}}"
+                  hostname: "{{hostname}}"
+                  instanceId: "{{instanceId}}"
+                  oci_region: "{{oci_region}}"
+                  subnet_cidr: "{{subnet_cidr}}"
+                  vm_shape: "{{subnet_cidr}}"
+                  vnic_id: "{{vnic_id}}"
+            json.keys_under_root: true
+            fields_under_root: true
 
-  - name: configure filebeat output to logstash
-    blockinfile: 
-      path: /etc/filebeat/filebeat.yml
-      insertafter: EOF
-      marker: "# {mark} logstash output direction for filebeat" 
-      content: |
-        output.logstash:
-          enable: true
-          hosts: ["{{logstashfqdn}}"]
+    - name: install yq
+      become: yes
+      get_url:
+        url: https://github.com/mikefarah/yq/releases/download/v4.25.1/yq_linux_amd64
+        dest: /usr/bin/yq
+        mode: 0755
+        validate_certs: no
 
-  - name: configure additional fileds in filebeat
-    blockinfile: 
-      path: /etc/filebeat/filebeat.yml
-      insertafter: "processors:"
-      marker: "# {mark} add_fileds vm details" 
-      content: |
-        # add_fields section 
-          - add_fields:
-              fields:
-                availabilityDomain: "{{availabilityDomain}}"
-                compartmentId: "{{compartmentId}}"
-                faultDomain: "{{faultDomain}}"
-                host_ip: "{{host_ip}}"
-                hostname: "{{hostname}}"
-                instanceId: "{{instanceId}}"
-                oci_region: "{{oci_region}}"
-                subnet_cidr: "{{subnet_cidr}}"
-                vm_shape: "{{subnet_cidr}}"
-                vnic_id: "{{vnic_id}}"
-              target: ''        
+  # filebeat supports only one output at a time.
+    - name: delete the existing outputs in filebeat conf
+      shell: yq eval 'del(."output.elasticsearch", ."output.logstash")' /etc/filebeat/filebeat.yml 
+      register: result    
+
+    - name: configure filebeat output to logstash
+      blockinfile: 
+        path: /etc/filebeat/filebeat.yml
+        insertafter: EOF
+        marker: "# {mark} logstash output direction for filebeat" 
+        content: |
+          output.logstash:
+            enable: true
+            hosts: ["{{logstashfqdn}}"]
+
+    - name: configure additional fileds in filebeat
+      blockinfile: 
+        path: /etc/filebeat/filebeat.yml
+        insertafter: "processors:"
+        marker: "# {mark} add_fileds vm details" 
+        content: |
+          # add_fields section 
+            - add_fields:
+                fields:
+                  availabilityDomain: "{{availabilityDomain}}"
+                  compartmentId: "{{compartmentId}}"
+                  faultDomain: "{{faultDomain}}"
+                  host_ip: "{{host_ip}}"
+                  hostname: "{{hostname}}"
+                  instanceId: "{{instanceId}}"
+                  oci_region: "{{oci_region}}"
+                  subnet_cidr: "{{subnet_cidr}}"
+                  vm_shape: "{{subnet_cidr}}"
+                  vnic_id: "{{vnic_id}}"
+                target: '' 
+    - name: unintall yq
+      file:
+        path: /usr/bin/yq
+        state: absent
+
+    when: vminfo_exists.stat.exists           
 
   - name: Make sure filebeat autostarts
     service:
@@ -138,12 +167,7 @@
   - name: Restart filebeat
     service:
       name: filebeat
-      state: restarted
-
-  - name: unintall yq
-    file:
-      path: /usr/bin/yq
-      state: absent     
+      state: restarted    
   # condition to run these tasks for RedHat linux distros
   when:
   - ansible_os_family == 'RedHat'  

@@ -44,8 +44,17 @@
   - name: Remove file Osquery conf file
     ansible.builtin.file:
       path: /etc/td-agent-bit/
-      state: absent  
-  
+      state: absent
+
+  - name: unintall yq
+    file:
+      path: /usr/bin/yq
+      state: absent
+
+  - name: delete vminfo yq
+    file:
+      path: /var/log/vminfo
+      state: absent       
  
 
   

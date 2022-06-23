@@ -4,12 +4,14 @@
     src: td-agent-bit.conf
     dest: /etc/td-agent-bit/td-agent-bit.conf
     mode: 0644
+
 - name: Configure | Source osquery main conf
   template:
     src: osquery.conf
     dest: /etc/osquery/osquery.conf
     mode: 0644
-  notify: Restart Osquery service
+  notify: Restart Osquery
+
 - name: Copy Shell script
   template:
     src: vm_info_extract.sh

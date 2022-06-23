@@ -47,6 +47,7 @@
   yum:
     name: /tmp/osquery-4.9.0-1.linux.x86_64.rpm
     state: present
+  become: yes
 
 - name: Ensure td-agent-bit Service is enabled and started
   become: true

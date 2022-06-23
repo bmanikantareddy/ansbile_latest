@@ -54,7 +54,7 @@
   #   http_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
   #   https_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
   yum:
-    name: osquery
+    name: https://osquery-packages.s3.us-east-1.amazonaws.com/rpm/osquery-5.3.0-1.linux.x86_64.rpm
     #name: /tmp/td-agent-bit-1.7.9-1.x86_64.rpm
     disable_gpg_check: yes
     state: present

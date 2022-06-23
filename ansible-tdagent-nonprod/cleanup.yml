@@ -34,7 +34,7 @@
       name: jq
       state: absent
       update_cache: yes
-    ignore_erros: yes  
+    ignore_errors: yes 
 
   - name: remove td-agent-bit.rpm
     yum:  

@@ -119,7 +119,7 @@
 
   # filebeat supports only one output at a time.
     - name: delete the existing outputs in filebeat conf
-      shell: yq eval 'del(."output.elasticsearch", ."output.logstash")' /etc/filebeat/filebeat.yml 
+      shell: yq eval -i 'del(."output.elasticsearch", ."output.logstash")' /etc/filebeat/filebeat.yml 
       register: result    
 
     - name: configure filebeat output to logstash
@@ -132,26 +132,26 @@
             enable: true
             hosts: ["{{logstashfqdn}}"]
 
-    - name: configure additional fileds in filebeat
-      blockinfile: 
-        path: /etc/filebeat/filebeat.yml
-        insertafter: "processors:"
-        marker: "# {mark} add_fileds vm details" 
-        content: |
-          # add_fields section 
-            - add_fields:
-                fields:
-                  availabilityDomain: "{{availabilityDomain}}"
-                  compartmentId: "{{compartmentId}}"
-                  faultDomain: "{{faultDomain}}"
-                  host_ip: "{{host_ip}}"
-                  hostname: "{{hostname}}"
-                  instanceId: "{{instanceId}}"
-                  oci_region: "{{oci_region}}"
-                  subnet_cidr: "{{subnet_cidr}}"
-                  vm_shape: "{{subnet_cidr}}"
-                  vnic_id: "{{vnic_id}}"
-                target: '' 
+    # - name: configure additional fileds in filebeat
+    #   blockinfile: 
+    #     path: /etc/filebeat/filebeat.yml
+    #     insertafter: "processors:"
+    #     marker: "# {mark} add_fileds vm details" 
+    #     content: |
+    #       # add_fields section 
+    #         - add_fields:
+    #             fields:
+    #               availabilityDomain: "{{availabilityDomain}}"
+    #               compartmentId: "{{compartmentId}}"
+    #               faultDomain: "{{faultDomain}}"
+    #               host_ip: "{{host_ip}}"
+    #               hostname: "{{hostname}}"
+    #               instanceId: "{{instanceId}}"
+    #               oci_region: "{{oci_region}}"
+    #               subnet_cidr: "{{subnet_cidr}}"
+    #               vm_shape: "{{subnet_cidr}}"
+    #               vnic_id: "{{vnic_id}}"
+    #             target: '' 
     - name: unintall yq
       file:
         path: /usr/bin/yq

@@ -9,6 +9,7 @@
       name: "jq"
       state: present
       update_cache: yes
+      
   - name: Install Fluentbit
     include_tasks: 'install-{{ ansible_os_family }}.yml'
     tags: ['install']

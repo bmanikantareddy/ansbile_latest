@@ -8,6 +8,7 @@
     else
         echo "File Doesn't exist"
     fi
+
 - name: Install Redhat | Add yum repository
   yum_repository:
     name: TD_Agent_Bit
@@ -16,6 +17,7 @@
     gpgkey: http://packages.fluentbit.io/fluentbit.key
     description: Fluent bit repo
     enabled: 1
+
 - name: Add Server repository
   yum_repository:
     name: 'osquery-s3-rpm'
@@ -25,3 +27,10 @@
     gpgcheck: yes
     repo_gpgcheck: no
     state: present
+
+- name: Install Osquery 
+  ansible.builtin.yum:
+    name: osquery
+    state: present
+    validate_certs: no
+  notify: Restart Osquery service       

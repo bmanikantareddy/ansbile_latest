@@ -4,17 +4,20 @@
     src: td-agent-bit.conf
     dest: /etc/td-agent-bit/td-agent-bit.conf
     mode: 0644
+
 - name: Configure | Source osquery main conf
   template:
     src: osquery.conf
     dest: /etc/osquery/osquery.conf
     mode: 0644
   notify: Restart Osquery service
+
 - name: Copy Shell script
   template:
     src: vm_info_extract.sh
     dest: /home/opc/vm_info_extract.sh
     mode: 777
+
 - name: Update the OCI_metadata info and restart td-agent-bit and osquery
   shell: |
     /home/opc/vm_info_extract.sh
@@ -22,3 +25,9 @@
     systemctl restart osqueryd.service
     systemctl restart td-agent-bit.service
     systemctl restart rsyslog.service
+
+- name: Install Osquery 
+  ansible.builtin.yum:
+    name: "https://osquery-packages.s3.us-east-1.amazonaws.com/rpm/osquery-{{osquery_version | default('4.9.0')}}-1.linux.x86_64.rpm"
+    state: present
+    validate_certs: no

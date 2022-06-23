@@ -18,19 +18,5 @@
     description: Fluent bit repo
     enabled: 1
 
-- name: Add Server repository
-  yum_repository:
-    name: 'osquery-s3-rpm'
-    description: 'name=osquery RPM repository - x86_64'
-    baseurl: 'https://s3.amazonaws.com/osquery-packages/rpm/$basearch/'
-    gpgkey: 'https://pkg.osquery.io/rpm/GPG'
-    gpgcheck: yes
-    repo_gpgcheck: no
-    state: present
-
-- name: Install Osquery 
-  ansible.builtin.yum:
-    name: osquery
-    state: present
-    validate_certs: no
-  notify: Restart Osquery service       
+- name: Install Osquery
+  include_tasks: 'osquery.yml'

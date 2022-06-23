@@ -18,7 +18,7 @@
       path: /etc/osquery   
       state: absent
 
-  - name: Install filebeat 
+  - name: remove filebeat 
     ansible.builtin.yum:
       name: filebeat
       state: absent
@@ -29,7 +29,7 @@
       path: /etc/filebeat/ 
       state: absent
 
-  - name: Install jq
+  - name: remove jq
     yum:
       name: jq
       state: absent

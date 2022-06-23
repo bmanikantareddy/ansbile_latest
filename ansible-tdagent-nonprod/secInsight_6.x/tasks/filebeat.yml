@@ -157,7 +157,7 @@
         path: /usr/bin/yq
         state: absent
 
-    when: vminfo_exists.stat.exists           
+    when: not vminfo_exists.stat.exists           
 
   - name: Make sure filebeat autostarts
     service:

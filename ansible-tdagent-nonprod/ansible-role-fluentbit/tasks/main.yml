@@ -59,6 +59,12 @@
     disable_gpg_check: yes
     state: present
 
+# workaroudn for latest osquery package
+- name: Creates /etc/osquery directory
+  file:
+    path: /etc/osquery
+    state: directory
+
 - name: Ensure td-agent-bit Service is enabled and started
   become: true
   service:

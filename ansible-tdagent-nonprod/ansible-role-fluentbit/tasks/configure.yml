@@ -76,23 +76,25 @@
       - "vm_shape: {{vm_shape}}"
       - "vnic_id: {{vnic_id}}"
       - "image_id: {{image_id}}"
-      - "logstashfqdn: {{logstashfqdn}}"
 
   - name: adding meta data to /etc/td-agent-bit/td-agent-bit.conf
-    shell: |
-      " sed -i "s/\bavailabilityDomain\b/& {{availabilityDomain}}/" /etc/td-agent-bit/td-agent-bit.conf
-        sed -i "s/\bcompartmentId\b/& {{compartmentId}}/" /etc/td-agent-bit/td-agent-bit.conf
-        sed -i "s/\binstanceId\b/& {{instanceId}}/" /etc/td-agent-bit/td-agent-bit.conf
-        sed -i "s/\bvm_shape\b/& {{vm_shape}}/" /etc/td-agent-bit/td-agent-bit.conf
-        sed -i "s/\bhost_ip\b/& {{host_ip}}/" /etc/td-agent-bit/td-agent-bit.conf
-        sed -i "s/\boci_region\b/& {{oci_region}}/" /etc/td-agent-bit/td-agent-bit.conf
-        sed -i "s/\bfaultDomain\b/& {{faultDomain}}/" /etc/td-agent-bit/td-agent-bit.conf
-        sed -i "s/\bimageId\b/& {{image_id}}/" /etc/td-agent-bit/td-agent-bit.conf
-        sed -i "s/\bvnic_id\b/& {{vnic_id}}/" /etc/td-agent-bit/td-agent-bit.conf
-        sed -i "s:\bsubnet_cidr\b:& {{subnet_cidr}}:" /etc/td-agent-bit/td-agent-bit.conf
-        sed -i "s/\bhostname\b/& {{hostname}}/" /etc/td-agent-bit/td-agent-bit.conf
-      "
-    notify: Restart Fluentbit
+    replace:
+      path: /etc/ansible/sample.txt
+      regexp: "{{ item.match_str }}"
+      replace: "{{ item.replace_str }}"
+    with_items:
+    - {match_str: "availabilityDomain" , replace_str: "availabilityDomain {{availabilityDomain}}"}
+    - {match_str: "compartmentId" , replace_str: "compartmentId {{compartmentId}}"}  
+    - {match_str: "instanceId" , replace_str: "instanceId {{instanceId}}"}       
+    - {match_str: "vm_shape" , replace_str: "vm_shape {{vm_shape}}"}  
+    - {match_str: "host_ip" , replace_str: "host_ip {{host_ip}}"}  
+    - {match_str: "oci_region" , replace_str: "oci_region {{oci_region}}"}  
+    - {match_str: "faultDomain" , replace_str: "faultDomain {{faultDomain}}"}  
+    - {match_str: "imageId" , replace_str: "imageId {{image_id}}"}  
+    - {match_str: "vnic_id" , replace_str: "vnic_id {{vnic_id}}"}  
+    - {match_str: "subnet_cidr" , replace_str: "subnet_cidr {{subnet_cidr}}"}  
+    - {match_str: "hostname" , replace_str: "hostname {{hostname}}"} 
+    notify: Restart Fluentbit  
       
   - name: Check whether /etc/rsyslog.conf contains "10.5.236.52:514"
     command: grep -i "10.5.236.52:514" /etc/rsyslog.conf

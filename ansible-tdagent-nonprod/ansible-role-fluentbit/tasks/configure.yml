@@ -12,15 +12,96 @@
     mode: 0644
   notify: Restart Osquery
 
-- name: Copy Shell script
-  template:
-    src: vm_info_extract.sh
-    dest: /home/opc/vm_info_extract.sh
-    mode: 777
-- name: Update the OCI_metadata info and restart td-agent-bit and osquery
-  shell: |
-    /home/opc/vm_info_extract.sh
-    sleep 10
-    systemctl restart osqueryd.service
-    systemctl restart td-agent-bit.service
-    systemctl restart rsyslog.service
+- name: check for vminfo exists
+  stat:
+    path: /var/log/vminfo
+  register: vminfo_exists  
+
+- name: Extract meta data from OCI
+  block: 
+  # load josn content from URL.
+  - name: Download JSON content play
+    uri:
+      url: http://169.254.169.254/opc/v1/instance/
+      return_content: yes
+    register: result
+
+  - name: save the Json data to vminfo as a Fact
+    set_fact:
+      vminfo: "{{ result.json }}"
+
+  - name: copying vminfo to file
+    copy: 
+      content: "{{ result.json }}"
+      dest: /var/log/vminfo    
+
+    # load josn content from URL.
+  - name: Download JSON content play
+    uri:
+      url: http://169.254.169.254/opc/v1/vnics/
+      return_content: yes
+    register: result 
+
+  - name: save the Json data to vcninfo as a Fact
+    set_fact:
+      vcninfo: "{{ result.json }}"
+
+  - name: Retrieve the fileds from json data
+    set_fact:
+      availabilityDomain: "{{ vminfo | json_query('availabilityDomain') }}"
+      compartmentId: "{{ vminfo | json_query('compartmentId') }}"
+      faultDomain: "{{ vminfo | json_query('faultDomain') }}"
+      host_ip: "{{ vcninfo | json_query('[0].privateIp') }}"
+      hostname: "{{ vminfo | json_query('hostname') }}"
+      instanceId: "{{ vminfo | json_query('id') }}"
+      oci_region: "{{ vminfo | json_query('canonicalRegionName') }}"
+      subnet_cidr: "{{ vcninfo | json_query('[0].subnetCidrBlock') }}"
+      vm_shape: "{{ vminfo | json_query('shape') }}"
+      vnic_id: "{{ vcninfo | json_query('[0].vnicId') }}"
+      image_id: "{{ vminfo | json_query('image') }}"
+      logstashfqdn: "{{logstashhost | default('127.0.0.1')}}:{{logstashport | default('5044')}}"
+  
+  # printing reterived fileds to stdout.
+  - name: Print out Vminfo
+    debug:
+      msg: 
+      - "availabilityDomain: {{availabilityDomain}}"
+      - "compartmentId: {{compartmentId}}"
+      - "faultDomain: {{faultDomain}}"
+      - "host_ip: {{host_ip}}"
+      - "hostname: {{hostname}}"
+      - "instanceId: {{instanceId}}"
+      - "oci_region: {{oci_region}}"
+      - "subnet_cidr: {{subnet_cidr}}"
+      - "vm_shape: {{vm_shape}}"
+      - "vnic_id: {{vnic_id}}"
+      - "image_id: {{image_id}}"
+      - "logstashfqdn: {{logstashfqdn}}"
+
+  - name: adding meta data to /etc/td-agent-bit/td-agent-bit.conf
+    shell: |
+      " sed -i "s/\bavailabilityDomain\b/& {{availabilityDomain}}/" /etc/td-agent-bit/td-agent-bit.conf
+        sed -i "s/\bcompartmentId\b/& {{compartmentId}}/" /etc/td-agent-bit/td-agent-bit.conf
+        sed -i "s/\binstanceId\b/& {{instanceId}}/" /etc/td-agent-bit/td-agent-bit.conf
+        sed -i "s/\bvm_shape\b/& {{vm_shape}}/" /etc/td-agent-bit/td-agent-bit.conf
+        sed -i "s/\bhost_ip\b/& {{host_ip}}/" /etc/td-agent-bit/td-agent-bit.conf
+        sed -i "s/\boci_region\b/& {{oci_region}}/" /etc/td-agent-bit/td-agent-bit.conf
+        sed -i "s/\bfaultDomain\b/& {{faultDomain}}/" /etc/td-agent-bit/td-agent-bit.conf
+        sed -i "s/\bimageId\b/& {{image_id}}/" /etc/td-agent-bit/td-agent-bit.conf
+        sed -i "s/\bvnic_id\b/& {{vnic_id}}/" /etc/td-agent-bit/td-agent-bit.conf
+        sed -i "s:\bsubnet_cidr\b:& {{subnet_cidr}}:" /etc/td-agent-bit/td-agent-bit.conf
+        sed -i "s/\bhostname\b/& {{hostname}}/" /etc/td-agent-bit/td-agent-bit.conf
+      "
+    notify: Restart Fluentbit
+      
+  - name: Check whether /etc/rsyslog.conf contains "10.5.236.52:514"
+    command: grep -i "10.5.236.52:514" /etc/rsyslog.conf
+    register: checkmyconf
+    check_mode: no
+    ignore_errors: yes
+    changed_when: no
+  
+  - name: replace remote host in /etc/rsyslog.conf
+    shell: "sed -i '/. @@remote-host:514/ a .  @@10.5.236.52:514' /etc/rsyslog.conf"
+    notify: Restart rsyslog
+    when: checkmyconf.rc == 0

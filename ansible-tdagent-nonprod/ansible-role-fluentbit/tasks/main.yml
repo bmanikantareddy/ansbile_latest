@@ -1,63 +1,35 @@
 ---
 # tasks file for ansible-role-fluentbit
-- name: Install jq
-  # environment:
-  #   http_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
-  #   https_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
-  yum:
-    name: jq
-    state: present
-    update_cache: yes
 
 - name: Install Fluentbit
   include_tasks: 'install-{{ ansible_os_family }}.yml'
   tags: ['install']
 
-# - name: Download td agent-bit.rpm
-#   # environment:
-#   #   http_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
-#   #   https_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
-#   get_url:
-#     url: https://packages.fluentbit.io/centos/7/x86_64/td-agent-bit-1.7.9-1.x86_64.rpm
-#     dest: /tmp/td-agent-bit-1.7.9-1.x86_64.rpm
-#     validate_certs: no
-
 - name: Install td-agent-bit.rpm
   # environment:
   #   http_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
   #   https_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
   yum:
-    name: https://packages.fluentbit.io/centos/7/x86_64/td-agent-bit-1.7.9-1.x86_64.rpm
-    #name: /tmp/td-agent-bit-1.7.9-1.x86_64.rpm
+    name: https://packages.fluentbit.io/centos/7/x86_64/td-agent-bit-{{td_agent_bit_version}}.x86_64.rpm
     disable_gpg_check: yes
     state: present
 
-# - name: Download osquery rpm
-#   # environment:
-#   #   http_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
-#   #   https_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
-#   get_url:
-#     url: https://pkg.osquery.io/rpm/osquery-4.9.0-1.linux.x86_64.rpm
-#     dest: /tmp/osquery-4.9.0-1.linux.x86_64.rpm
+- name: Download osquery rpm
+  # environment:
+  #   http_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
+  #   https_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
+  get_url:
+    url: https://pkg.osquery.io/rpm/osquery-{{osquery_version}}.linux.x86_64.rpm
+    dest: /tmp/osquery-{{osquery_version}}.linux.x86_64.rpm
 
-# - name: Ensure latest version of packages is installed.
-#   # environment:
-#   #   http_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
-#   #   https_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
-#   yum:
-#     name: /tmp/osquery-4.9.0-1.linux.x86_64.rpm
-#     state: present
-#   become: yes
-
-- name: Install td-agent-bit.rpm
+- name: Ensure latest version of packages is installed.
   # environment:
   #   http_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
   #   https_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
   yum:
-    name: https://osquery-packages.s3.us-east-1.amazonaws.com/rpm/osquery-5.3.0-1.linux.x86_64.rpm
-    #name: /tmp/td-agent-bit-1.7.9-1.x86_64.rpm
-    disable_gpg_check: yes
+    name: /tmp/osquery-{{osquery_version}}.linux.x86_64.rpm
     state: present
+  become: yes
 
 # workaroudn for latest osquery package
 - name: Creates /etc/osquery directory

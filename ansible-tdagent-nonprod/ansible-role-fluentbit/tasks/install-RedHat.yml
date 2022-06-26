@@ -1,7 +1,6 @@
 ---
 - name: Write VM metadata to var log vm info
   shell: |
-    oci-metadata -j > /var/log/vminfo
     if [ -e /etc/yum.repos.d/oracle-linux-ol7.repo.osms-backup ]
     then
         mv /etc/yum.repos.d/oracle-linux-ol7.repo.osms-backup /etc/yum.repos.d/oracle-linux-ol7.repo

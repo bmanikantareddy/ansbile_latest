@@ -55,9 +55,10 @@
         subnet_cidr: "{{ vcninfo | json_query('[0].subnetCidrBlock') }}"
         vm_shape: "{{ vminfo | json_query('shape') }}"
         vnic_id: "{{ vcninfo | json_query('[0].vnicId') }}"
+        image_id: "{{ vminfo | json_query('image') }}"
         logstashfqdn: "{{logstashhost | default('127.0.0.1')}}:{{logstashport | default('5044')}}"
 
-      # printing reterived fileds to stdout.
+    # printing reterived fileds to stdout.
     - name: Print out Vminfo
       debug:
         msg: 
@@ -71,6 +72,7 @@
         - "subnet_cidr: {{subnet_cidr}}"
         - "vm_shape: {{vm_shape}}"
         - "vnic_id: {{vnic_id}}"
+        - "image_id: {{image_id}}"
         - "logstashfqdn: {{logstashfqdn}}"  
 
     - name: Check whether /etc/rsyslog.conf contains "10.5.236.52:514"
@@ -106,6 +108,7 @@
                   subnet_cidr: "{{subnet_cidr}}"
                   vm_shape: "{{subnet_cidr}}"
                   vnic_id: "{{vnic_id}}"
+                  image_id: "{{image_id}}"
             json.keys_under_root: true
             fields_under_root: true
 

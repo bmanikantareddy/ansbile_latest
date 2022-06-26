@@ -79,7 +79,7 @@
 
   - name: adding meta data to /etc/td-agent-bit/td-agent-bit.conf
     replace:
-      path: /etc/ansible/sample.txt
+      path: /etc/td-agent-bit/td-agent-bit.conf
       regexp: "{{ item.match_str }}"
       replace: "{{ item.replace_str }}"
     with_items:

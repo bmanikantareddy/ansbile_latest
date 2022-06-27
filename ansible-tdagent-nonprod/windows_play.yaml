@@ -1,0 +1,10 @@
+---
+
+- name: windows playbook
+  hosts: windows_hosts # add windows hostip and need to check for authentication
+  tasks:
+  - name: adding entry to hosts file
+    community.windows.win_hosts:
+      state: present
+      canonical_name: localhost  # change here for name 
+      ip_address: 127.0.0.1  # change here for IP

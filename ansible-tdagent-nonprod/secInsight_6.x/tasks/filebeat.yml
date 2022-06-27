@@ -87,6 +87,7 @@
     
     - name: replace remote host in /etc/rsyslog.conf
       shell: "sed -i '/. @@remote-host:514/ a .  @@10.5.236.52:514' /etc/rsyslog.conf"
+      notify: Restart rsyslog
       when: checkmyconf.rc == 0 
 
     - name: configure osquery input to filebeat

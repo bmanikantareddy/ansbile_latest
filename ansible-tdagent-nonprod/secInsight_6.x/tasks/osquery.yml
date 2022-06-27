@@ -3,7 +3,10 @@
 - name: Install & configure Osquery
   become: yes
   block:
-  - name: Install Osquery 
+  - name: Install Osquery
+    environment:
+      http_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
+      https_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
     ansible.builtin.yum:
       name: "https://osquery-packages.s3.us-east-1.amazonaws.com/rpm/osquery-{{osquery_version | default('4.9.0')}}-1.linux.x86_64.rpm"
       state: present

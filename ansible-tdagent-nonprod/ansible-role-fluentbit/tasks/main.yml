@@ -31,11 +31,17 @@
     state: present
   become: yes
 
+- name: Ansible check directory.
+  stat:
+    path: /etc/osquery
+  register: osquery_folder
+
 # workaround for latest osquery package
 - name: Creates /etc/osquery directory
   file:
     path: /etc/osquery
     state: directory
+  when: osquery_folder.stat.exists == false   
 
 - name: Ensure td-agent-bit Service is enabled and started
   become: true

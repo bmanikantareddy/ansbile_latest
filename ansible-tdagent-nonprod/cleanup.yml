@@ -24,7 +24,7 @@
       state: absent
       validate_certs: no
   
-  - name: Remove file Osquery conf file
+  - name: Remove file filebeat conf file
     ansible.builtin.file:
       path: /etc/filebeat/ 
       state: absent
@@ -36,13 +36,13 @@
       update_cache: yes
     ignore_errors: yes 
 
-  - name: remove td-agent-bit.rpm
+  - name: remove td-agent-bit
     yum:  
       name: td-agent-bit
       state: absent
       disable_gpg_check: yes
 
-  - name: Remove file Osquery conf file
+  - name: Remove file td-agent-bit conf file
     ansible.builtin.file:
       path: /etc/td-agent-bit/
       state: absent

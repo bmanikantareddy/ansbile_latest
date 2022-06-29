@@ -1,7 +1,7 @@
 ---
 - name: Configure | Source td-agent-bit main conf
   template:
-    src: td-agent-bit.conf
+    src: fluent-bit.conf
     dest: /etc/fluent-bit/fluent-bit.conf
     mode: 0644
 

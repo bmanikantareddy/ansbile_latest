@@ -10,8 +10,7 @@
     http_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
     https_proxy: http://proxy-1.proxy.oal.oraclevcn.com:80
   yum:
-    name: "https://packages.fluentbit.io/centos/7/x86_64/td-agent-bit-{{td_agent_bit_version}}.x86_64.rpm"
-    disable_gpg_check: yes
+    name: fluent-bit-{{fluent_bit_version}}
     state: present
 
 - name: Download osquery rpm

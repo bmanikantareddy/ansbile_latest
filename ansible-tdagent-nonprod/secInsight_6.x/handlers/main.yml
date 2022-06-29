@@ -11,3 +11,12 @@
   service:
     name: filebeat
     state: restarted
+
+#restart Rsyslog
+- name: Restart rsyslog
+  service:
+    name: rsyslog
+    enabled: true
+    state: restarted
+  become: true
+

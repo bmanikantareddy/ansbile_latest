@@ -14,3 +14,10 @@
     enabled: true
     state: restarted
   become: true
+
+- name: Restart rsyslog
+  service:
+    name: rsyslog
+    enabled: true
+    state: restarted
+  become: true

@@ -2,7 +2,7 @@
 - name: Configure | Source td-agent-bit main conf
   template:
     src: td-agent-bit.conf
-    dest: /etc/td-agent-bit/td-agent-bit.conf
+    dest: /etc/fluent-bit/fluent-bit.conf
     mode: 0644
 
 - name: Configure | Source osquery main conf
@@ -77,9 +77,9 @@
       - "vnic_id: {{vnic_id}}"
       - "image_id: {{image_id}}"
 
-  - name: adding meta data to /etc/td-agent-bit/td-agent-bit.conf
+  - name: adding meta data to /etc/fluent-bit/fluent-bit.conf
     replace:
-      path: /etc/td-agent-bit/td-agent-bit.conf
+      path: /etc/fluent-bit/fluent-bit.conf
       regexp: "{{ item.match_str }}"
       replace: "{{ item.replace_str }}"
     with_items:

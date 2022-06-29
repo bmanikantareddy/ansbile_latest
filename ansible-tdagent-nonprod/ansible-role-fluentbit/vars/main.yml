@@ -4,5 +4,5 @@
 oracle_home_path: "/usr/lib/oracle/18.3/client64/"
 ld_library_path: "/usr/lib/oracle/18.3/client64/lib/"
 bin_path: "/usr/lib/oracle/18.3/client64/bin/"
-td_agent_bit_version: "1.7.9-1"
+fluent_bit_version: "1.9.5-1"  #it should be greater than 1.9.0-1
 osquery_version: "4.9.0-1"

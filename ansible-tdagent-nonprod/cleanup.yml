@@ -7,56 +7,32 @@
     osquery_version: "4.9.0"
     filebeat_version: "7.17.0"
   tasks:
-  - name: cleanup Osquery 
-    ansible.builtin.yum:
-      name: osqueryd
-      state: absent
-      validate_certs: no
-
-  - name: Remove file Osquery conf file
-    ansible.builtin.file:
-      path: /etc/osquery   
-      state: absent
-
-  - name: remove filebeat 
-    ansible.builtin.yum:
-      name: filebeat
-      state: absent
-      validate_certs: no
-  
-  - name: Remove file filebeat conf file
-    ansible.builtin.file:
-      path: /etc/filebeat/ 
-      state: absent
-
-  - name: remove jq
+  - name: cleanup All installed packages 
     yum:
-      name: jq
+      name: "{{item}}"
       state: absent
       update_cache: yes
-    ignore_errors: yes 
-
-  - name: remove td-agent-bit
-    yum:  
-      name: td-agent-bit
-      state: absent
-      disable_gpg_check: yes
-
-  - name: Remove file td-agent-bit conf file
+    ignore_errors: yes
+    with_items:
+    - osqueryd
+    - jq
+    - filebeat
+    - td-agent-bit
+    - fluent-bit
+  
+  - name: Remove all configuration files
     ansible.builtin.file:
-      path: /etc/td-agent-bit/
+      path: "{{item}}" 
       state: absent
+    with_items: 
+    - /etc/filebeat/
+    - /etc/fluent-bit/fluent-bit.conf
+    - /etc/td-agent-bit/
+    - /etc/osquery
+    - /usr/bin/yq
+    - /var/log/vminfo 
 
-  - name: unintall yq
-    file:
-      path: /usr/bin/yq
-      state: absent
 
-  - name: delete vminfo yq
-    file:
-      path: /var/log/vminfo
-      state: absent       
- 
 
   
     
